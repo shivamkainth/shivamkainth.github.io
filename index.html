@@ -130,8 +130,14 @@
       position: relative;
       width: 52px; height: 27px;
       flex-shrink: 0;
+      cursor: pointer;
+      display: inline-block;
     }
-    .theme-toggle input { opacity: 0; width: 0; height: 0; }
+    .theme-toggle input {
+      opacity: 0;
+      width: 0; height: 0;
+      position: absolute;
+    }
     .toggle-track {
       position: absolute; inset: 0;
       background: var(--border);
@@ -155,11 +161,10 @@
     .toggle-icons {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
       font-size: 13px;
       color: var(--ink-light);
       user-select: none;
-      cursor: pointer;
     }
     .toggle-label {
       font-size: 11px;
@@ -168,6 +173,7 @@
       text-transform: uppercase;
       color: var(--ink-mid);
       transition: color 0.35s;
+      min-width: 32px;
     }
 
     /* ── Hamburger ── */
@@ -699,9 +705,9 @@
       </ul>
     </div>
     <div class="nav-right">
-      <div class="toggle-icons" onclick="document.getElementById('themeToggle').click()">
+      <div class="toggle-icons">
         <span>☀️</span>
-        <label class="theme-toggle">
+        <label class="theme-toggle" for="themeToggle">
           <input type="checkbox" id="themeToggle">
           <span class="toggle-track"></span>
         </label>
@@ -1069,8 +1075,8 @@
         </div>
         <div class="reveal">
           <div class="contact-links">
-            <a href="mailto:Shivam.20csz0006@iitrpr.ac.in" class="c-link">
-              <span class="c-icon">✉</span>Shivam.20csz0006@iitrpr.ac.in
+            <a href="/cdn-cgi/l/email-protection#a8fbc0c1dec9c5869a98cbdbd29898989ee8c1c1dcdad8da86c9cb86c1c6" class="c-link">
+              <span class="c-icon">✉</span><span class="__cf_email__" data-cfemail="ca99a2a3bcaba7e4f8faa9b9b0fafafafc8aa3a3beb8bab8e4aba9e4a3a4">[email&#160;protected]</span>
             </a>
             <a href="https://scholar.google.com/citations?user=SeS8cOwAAAAJ&hl=en" target="_blank" class="c-link">
               <span class="c-icon">◈</span>Google Scholar
@@ -1093,30 +1099,31 @@
 
   </main>
 
-  <script>
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
     // ── Theme toggle ──
     const themeToggle = document.getElementById('themeToggle');
     const toggleLabel = document.getElementById('toggleLabel');
     const html = document.documentElement;
 
-    // Respect system preference on first load
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const saved = localStorage.getItem('theme');
-    const initial = saved || (prefersDark ? 'dark' : 'light');
-    applyTheme(initial);
-
-    themeToggle.addEventListener('change', () => {
-      applyTheme(themeToggle.checked ? 'dark' : 'light');
-    });
-
     function applyTheme(theme) {
       html.setAttribute('data-theme', theme);
-      themeToggle.checked = theme === 'dark';
+      themeToggle.checked = (theme === 'dark');
       toggleLabel.textContent = theme === 'dark' ? 'Dark' : 'Light';
-      localStorage.setItem('theme', theme);
-      // Update nav background directly for transitions
-      document.querySelector('nav').style.background = '';
+      try { localStorage.setItem('theme', theme); } catch(e) {}
     }
+
+    // Load saved preference, fall back to OS preference
+    (function() {
+      let saved;
+      try { saved = localStorage.getItem('theme'); } catch(e) {}
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      applyTheme(saved || (prefersDark ? 'dark' : 'light'));
+    })();
+
+    // Single 'change' event — fires once per real toggle, works on all browsers
+    themeToggle.addEventListener('change', function() {
+      applyTheme(this.checked ? 'dark' : 'light');
+    });
 
     // ── Nav scroll ──
     const nav = document.getElementById('navbar');
@@ -1140,14 +1147,4 @@
       entries.forEach(e => {
         if (e.isIntersecting) {
           const siblings = [...e.target.parentElement.querySelectorAll('.reveal:not(.visible)')];
-          const idx = siblings.indexOf(e.target);
-          setTimeout(() => e.target.classList.add('visible'), Math.min(idx, 5) * 85);
-          obs.unobserve(e.target);
-        }
-      });
-    }, { threshold: 0.08 });
-    reveals.forEach(el => obs.observe(el));
-  </script>
-
-</body>
-</html>
+          const idx = siblings
