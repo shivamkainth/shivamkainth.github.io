@@ -1099,7 +1099,7 @@
 
   </main>
 
-  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  <script>
     // ── Theme toggle ──
     const themeToggle = document.getElementById('themeToggle');
     const toggleLabel = document.getElementById('toggleLabel');
@@ -1112,7 +1112,6 @@
       try { localStorage.setItem('theme', theme); } catch(e) {}
     }
 
-    // Load saved preference, fall back to OS preference
     (function() {
       let saved;
       try { saved = localStorage.getItem('theme'); } catch(e) {}
@@ -1120,7 +1119,6 @@
       applyTheme(saved || (prefersDark ? 'dark' : 'light'));
     })();
 
-    // Single 'change' event — fires once per real toggle, works on all browsers
     themeToggle.addEventListener('change', function() {
       applyTheme(this.checked ? 'dark' : 'light');
     });
@@ -1147,4 +1145,13 @@
       entries.forEach(e => {
         if (e.isIntersecting) {
           const siblings = [...e.target.parentElement.querySelectorAll('.reveal:not(.visible)')];
-          const idx = siblings
+          const idx = siblings.indexOf(e.target);
+          setTimeout(() => e.target.classList.add('visible'), Math.min(idx, 5) * 85);
+          obs.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.08 });
+    reveals.forEach(el => obs.observe(el));
+  </script>
+</body>
+</html>
